@@ -62,6 +62,13 @@ class ReadingLog:
                 results.append(entry)
         return results
 
+    def get_author_books(self, author):
+        results = []
+        for entry in self.diary:
+            if entry['Author'].lower() == author.lower():
+                results.append(entry)
+        return results
+
     def delete_entry(self, author, title):
         self.diary = [entry for entry in self.diary if entry['Author'].lower() != author.lower() or entry['Title'].lower() != title.lower()]
         self.save_to_file()
@@ -94,7 +101,7 @@ class ReadingLogGUI(tk.Tk):
     def __init__(self, filename):
         super().__init__()
         self.title("Reading Log")
-        self.geometry("600x800")  # Zvětšeno šířku okna
+        self.geometry("400x600") 
 
         # Barevný motiv
         self.configure(bg="#F0F0F0")  # Barva pozadí
@@ -102,6 +109,10 @@ class ReadingLogGUI(tk.Tk):
         self.reading_log = ReadingLog(filename)
 
         self.create_widgets()
+
+        # Po spuštění aktualizuje počet knih a zobrazí všechny knihy
+        self.update_book_count()
+        self.show_all_books()
 
     def create_widgets(self):
         # Barvy pro prvky GUI
@@ -122,6 +133,7 @@ class ReadingLogGUI(tk.Tk):
 
         self.insert_button = tk.Button(self, text="Insert Entry", command=self.insert_entry, bg="#4CAF50", fg="#FFFFFF")  # Zelené tlačítko
         self.search_button = tk.Button(self, text="Search Entries", command=self.search_entries, bg="#008CBA", fg="#FFFFFF")  # Modré tlačítko
+        self.show_all_button = tk.Button(self, text="Show All Books", command=self.show_all_books, bg="#008CBA", fg="#FFFFFF")  # Modré tlačítko
         self.delete_button = tk.Button(self, text="Delete Entry", command=self.delete_entry, bg="#FF0000", fg="#FFFFFF")  # Červené tlačítko
         self.delete_all_button = tk.Button(self, text="Delete All Entries", command=self.delete_all_entries, bg="#FF0000", fg="#FFFFFF")  # Červené tlačítko
 
@@ -145,10 +157,10 @@ class ReadingLogGUI(tk.Tk):
         self.pages_entry.grid(row=3, column=1, pady=5, padx=10, sticky="w")
         self.insert_button.grid(row=4, column=0, pady=10, padx=10, sticky="w")
         self.search_button.grid(row=4, column=1, pady=10, padx=10, sticky="w")
-        self.delete_button.grid(row=5, column=0, pady=10, padx=10, sticky="w")
-        self.delete_all_button.grid(row=5, column=1, pady=10, padx=10, sticky="w")
-        self.save_button.grid(row=6, column=0, pady=10, padx=10, sticky="w")
-        self.load_button.grid(row=6, column=1, pady=10, padx=10, sticky="w")
+        self.show_all_button.grid(row=5, column=0, pady=10, padx=10, sticky="w")
+        self.delete_button.grid(row=5, column=1, pady=10, padx=10, sticky="w")
+        self.delete_all_button.grid(row=6, column=0, pady=10, padx=10, sticky="w")
+        self.save_button.grid(row=6, column=1, pady=10, padx=10, sticky="w")
 
         self.result_listbox.grid(row=7, column=0, columnspan=2, pady=10, padx=10, sticky="nsew")
 
@@ -188,11 +200,27 @@ class ReadingLogGUI(tk.Tk):
 
         author = self.capitalize_text(self.author_entry.get())
         title = self.capitalize_text(self.title_entry.get())
-        results = self.reading_log.search_entries(author, title)
+
+        if not author and not title:
+            messagebox.showwarning("Warning", "Please enter author or title.")
+            return
+
+        if author and not title:
+            # Zobrazení všech knih autora
+            results = self.reading_log.get_author_books(author)
+        else:
+            results = self.reading_log.search_entries(author, title)
 
         for result in results:
             timestamp = result.get('Timestamp', 'N/A')
             self.result_listbox.insert(tk.END, f"{result['Author']} - {result['Title']}({result['Year']}) --- {result['Pages']} - Added: {timestamp}")
+
+    def show_all_books(self):
+        self.result_listbox.delete(0, tk.END)
+        all_books = self.reading_log.search_entries()
+        for book in all_books:
+            timestamp = book.get('Timestamp', 'N/A')
+            self.result_listbox.insert(tk.END, f"{book['Author']} - {book['Title']}({book['Year']}) --- {book['Pages']} - Added: {timestamp}")
 
     def delete_entry(self):
         author = self.capitalize_text(self.author_entry.get())
@@ -228,6 +256,6 @@ class ReadingLogGUI(tk.Tk):
         self.book_count_label.config(text=f"Book Count: {book_count}")
 
 if __name__ == "__main__":
-    file_path = "C:/Users/thera/Desktop/Ukol/diary.json"
+    file_path = "C:/Users/thera/Desktop/Ukol/Reading-Log/diary.json"
     app = ReadingLogGUI(file_path)
     app.mainloop()
