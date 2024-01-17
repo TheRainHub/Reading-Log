@@ -36,7 +36,7 @@ Uživatel programu bude moci:
 
 import json
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from datetime import datetime
 
 class ReadingLog:
@@ -85,7 +85,7 @@ class ReadingLog:
     def save_to_file(self):
         with open(self.filename, 'w') as file:
             json.dump(self.diary, file, indent=2)
-        messagebox.showinfo("Success", f"Diary saved to {self.filename}.")
+        messagebox.showinfo("Success", f"Diary saved to {self.filename}")
 
     def load_from_file(self):
         try:
@@ -101,23 +101,20 @@ class ReadingLogGUI(tk.Tk):
     def __init__(self, filename):
         super().__init__()
         self.title("Reading Log")
-        self.geometry("400x600") 
-
-        # Barevný motiv
-        self.configure(bg="#F0F0F0")  # Barva pozadí
+        self.geometry("400x600")
+        self.dark_theme = tk.BooleanVar(value=False)
+        self.configure(bg="#F0F0F0")
 
         self.reading_log = ReadingLog(filename)
 
         self.create_widgets()
 
-        # Po spuštění aktualizuje počet knih a zobrazí všechny knihy
         self.update_book_count()
         self.show_all_books()
 
     def create_widgets(self):
-        # Barvy pro prvky GUI
-        bg_color = "#FFFFFF"  # Bílá barva pro pozadí prvků
-        fg_color = "#000000"  # Černá barva pro text
+        bg_color = "#FFFFFF"
+        fg_color = "#000000"
 
         self.author_label = tk.Label(self, text="Author:", bg="#F0F0F0", fg=fg_color)
         self.author_entry = tk.Entry(self, bg=bg_color)
@@ -131,22 +128,22 @@ class ReadingLogGUI(tk.Tk):
         self.pages_label = tk.Label(self, text="Number of Pages:", bg="#F0F0F0", fg=fg_color)
         self.pages_entry = tk.Entry(self, bg=bg_color)
 
-        self.insert_button = tk.Button(self, text="Insert Entry", command=self.insert_entry, bg="#4CAF50", fg="#FFFFFF")  # Zelené tlačítko
-        self.search_button = tk.Button(self, text="Search Entries", command=self.search_entries, bg="#008CBA", fg="#FFFFFF")  # Modré tlačítko
-        self.show_all_button = tk.Button(self, text="Show All Books", command=self.show_all_books, bg="#008CBA", fg="#FFFFFF")  # Modré tlačítko
-        self.delete_button = tk.Button(self, text="Delete Entry", command=self.delete_entry, bg="#FF0000", fg="#FFFFFF")  # Červené tlačítko
-        self.delete_all_button = tk.Button(self, text="Delete All Entries", command=self.delete_all_entries, bg="#FF0000", fg="#FFFFFF")  # Červené tlačítko
+        self.insert_button = tk.Button(self, text="Insert Entry", command=self.insert_entry, bg="#4CAF50", fg="#FFFFFF")
+        self.search_button = tk.Button(self, text="Search Entries", command=self.search_entries, bg="#008CBA", fg="#FFFFFF")
+        self.show_all_button = tk.Button(self, text="Show All Books", command=self.show_all_books, bg="#008CBA", fg="#FFFFFF")
+        self.delete_button = tk.Button(self, text="Delete Entry", command=self.delete_entry, bg="#FF0000", fg="#FFFFFF")
+        self.delete_all_button = tk.Button(self, text="Delete All Entries", command=self.delete_all_entries, bg="#FF0000", fg="#FFFFFF")
 
-        self.save_button = tk.Button(self, text="Save to File", command=self.save_to_file, bg="#4CAF50", fg="#FFFFFF")  # Zelené tlačítko
-        self.load_button = tk.Button(self, text="Load from File", command=self.load_from_file, bg="#008CBA", fg="#FFFFFF")  # Modré tlačítko
+        self.save_button = tk.Button(self, text="Save to File", command=self.save_to_file, bg="#4CAF50", fg="#FFFFFF")
+        self.load_button = tk.Button(self, text="Load from File", command=self.load_from_file, bg="#008CBA", fg="#FFFFFF")
 
-        # Seznam výsledků
         self.result_listbox = tk.Listbox(self, width=10, height=10, bg=bg_color, fg=fg_color)
 
-        # Widget s počtem knih v deníku
         self.book_count_label = tk.Label(self, text="Book Count: 0", bg="#F0F0F0", fg=fg_color)
 
-        # Umístění prvků do mřížky
+        self.theme_switch_label = tk.Label(self, text="Dark Theme", bg="#F0F0F0", fg="#000000")
+        self.theme_switch = ttk.Checkbutton(self, variable=self.dark_theme, command=self.toggle_theme, style='Switch.TCheckbutton')
+
         self.author_label.grid(row=0, column=0, pady=5, padx=10, sticky="w")
         self.author_entry.grid(row=0, column=1, pady=5, padx=10, sticky="w")
         self.title_label.grid(row=1, column=0, pady=5, padx=10, sticky="w")
@@ -166,10 +163,41 @@ class ReadingLogGUI(tk.Tk):
 
         self.book_count_label.grid(row=8, column=0, columnspan=2, pady=10, padx=10, sticky="nsew")
 
-        # Konfigurace mřížky pro pružnost
+        self.theme_switch_label.grid(row=9, column=0, columnspan=2, pady=10, padx=10, sticky="nsew")
+        self.theme_switch.grid(row=9, column=2, pady=10, padx=10, sticky="nsew")
+
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.rowconfigure(7, weight=1)
+
+        style = ttk.Style()
+        style.configure('Switch.TCheckbutton', background="#F0F0F0", foreground="#000000")
+
+    def toggle_theme(self):
+        if self.dark_theme.get():
+            self.configure(bg="#000000")  
+            fg_color = "#FFFFFF"
+            bg_color = "#000000"
+        else:
+            self.configure(bg="#FFFFFF")
+            fg_color = "#000000"
+            bg_color = "#FFFFFF"
+
+        self.author_label.config(fg="#000000")
+        self.title_label.config(fg="#000000")
+        self.year_label.config(fg="#000000")
+        self.pages_label.config(fg="#000000")
+        self.insert_button.config(bg="#4CAF50", fg="#FFFFFF")
+        self.search_button.config(bg="#008CBA", fg="#FFFFFF")
+        self.show_all_button.config(bg="#008CBA", fg="#FFFFFF")
+        self.delete_button.config(bg="#FF0000", fg="#FFFFFF")
+        self.delete_all_button.config(bg="#FF0000", fg="#FFFFFF")
+        self.save_button.config(bg="#4CAF50", fg="#FFFFFF")
+        self.load_button.config(bg="#008CBA", fg="#FFFFFF")
+        self.result_listbox.config(bg=bg_color, fg=fg_color)
+        self.book_count_label.config(bg="#F0F0F0", fg="#000000")
+        self.theme_switch_label.config(bg="#F0F0F0", fg="#000000")
+
 
     def insert_entry(self):
         author = self.capitalize_text(self.author_entry.get())
@@ -192,7 +220,6 @@ class ReadingLogGUI(tk.Tk):
         self.year_entry.delete(0, tk.END)
         self.pages_entry.delete(0, tk.END)
 
-        # Aktualizace počtu knih v deníku
         self.update_book_count()
 
     def search_entries(self):
@@ -206,7 +233,6 @@ class ReadingLogGUI(tk.Tk):
             return
 
         if author and not title:
-            # Zobrazení všech knih autora
             results = self.reading_log.get_author_books(author)
         else:
             results = self.reading_log.search_entries(author, title)
@@ -226,16 +252,12 @@ class ReadingLogGUI(tk.Tk):
         author = self.capitalize_text(self.author_entry.get())
         title = self.capitalize_text(self.title_entry.get())
         self.reading_log.delete_entry(author, title)
-
-        # Aktualizace počtu knih v deníku
         self.update_book_count()
 
     def delete_all_entries(self):
         confirmation = messagebox.askyesno("Confirmation", "Are you sure you want to delete all entries?")
         if confirmation:
             self.reading_log.delete_all_entries()
-
-            # Aktualizace počtu knih v deníku
             self.update_book_count()
 
     def save_to_file(self):
@@ -244,8 +266,6 @@ class ReadingLogGUI(tk.Tk):
     def load_from_file(self):
         self.reading_log.load_from_file()
         messagebox.showinfo("Success", "Diary loaded from your Diary.")
-
-        # Aktualizace počtu knih v deníku
         self.update_book_count()
 
     def capitalize_text(self, text):
