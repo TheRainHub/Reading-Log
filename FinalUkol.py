@@ -116,6 +116,10 @@ class ReadingLogGUI(tk.Tk):
         bgColor = "#FFFFFF"
         fgColor = "#000000"
 
+        self.yearSearchEntryLabel = tk.Label(self, text = "Search by Year:", bg = "#F0F0F0", fg = "#000000")
+        self.yearSearchEntry = tk.Entry(self, bg="#FFFFFF")
+
+
         self.authorLabel = tk.Label(self, text="Author:", bg="#F0F0F0", fg=fgColor)
         self.authorEntry = tk.Entry(self, bg=bgColor)
 
@@ -128,6 +132,7 @@ class ReadingLogGUI(tk.Tk):
         self.pagesLabel = tk.Label(self, text="Number of Pages:", bg="#F0F0F0", fg=fgColor)
         self.pagesEntry = tk.Entry(self, bg=bgColor)
 
+        
         self.insertButton = tk.Button(self, text="Insert Entry", command=self.insertEntry, bg="#4CAF50", fg="#FFFFFF")
         self.searchButton = tk.Button(self, text="Search Entries", command=self.searchEntries, bg="#008CBA", fg="#FFFFFF")
         self.showAllButton = tk.Button(self, text="Show All Books", command=self.showAllBooks, bg="#008CBA", fg="#FFFFFF")
@@ -143,6 +148,7 @@ class ReadingLogGUI(tk.Tk):
 
         self.themeSwitchLabel = tk.Label(self, text="Dark Theme", bg="#F0F0F0", fg="#000000")
         self.themeSwitch = ttk.Checkbutton(self, variable=self.darkTheme, command=self.toggleTheme, style='Switch.TCheckbutton')
+    
 
         self.authorLabel.grid(row=0, column=0, pady=5, padx=10, sticky="w")
         self.authorEntry.grid(row=0, column=1, pady=5, padx=10, sticky="w")
@@ -158,6 +164,7 @@ class ReadingLogGUI(tk.Tk):
         self.deleteButton.grid(row=5, column=1, pady=10, padx=10, sticky="w")
         self.deleteAllButton.grid(row=6, column=0, pady=10, padx=10, sticky="w")
         self.saveButton.grid(row=6, column=1, pady=10, padx=10, sticky="w")
+        
 
         self.resultListbox.grid(row=7, column=0, columnspan=2, pady=10, padx=10, sticky="nsew")
 
@@ -207,6 +214,15 @@ class ReadingLogGUI(tk.Tk):
         try:
             year = int(year)
             pages = int(pages)
+
+
+            if year < 0 or pages < 0:
+                messagebox.showerror("Error", "Year and Pages must be non-negative integers.")
+                return
+            elif year > 2024:
+                messagebox.showerror("Error", "Marty McFly?!!!? DOC?! Mc Brown?!!\nDid you actually invent a time machine?!\n")
+                return
+            
         except ValueError:
             messagebox.showerror("Error", "Year and Pages must be integers.")
             return
@@ -264,7 +280,7 @@ class ReadingLogGUI(tk.Tk):
 
     def loadFromFile(self):
         self.readingLog.loadFromFile()
-        messagebox.showinfo("Success", "Diary loaded from your Diary.")
+        messagebox.showinfo("Success! Diary loaded from your Diary.")
         self.updateBookCount()
 
     def capitalizeText(self, text):
